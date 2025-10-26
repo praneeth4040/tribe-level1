@@ -1,7 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const session = require('express-session');
-const passport = require('passport');
 const mongoose = require('mongoose');
 const multiOAuth = require('multi-oauth-strategies');
 
@@ -37,23 +35,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/tribe-oau
 
 // ===== MIDDLEWARE =====
 app.use(express.json());
-app.use(session({
+
+// ===== SETUP OAUTH WITH AUTOMATIC PASSPORT INITIALIZATION =====
+multiOAuth.initializeOAuth(app, User, ['google', 'facebook', 'github', 'linkedin', 'twitter', 'instagram', 'reddit'], {
   secret: process.env.SESSION_SECRET || 'test-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: false, 
+  cookie: {
+    secure: false,
     httpOnly: true,
     sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000
   }
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// ===== SETUP PASSPORT WITH PACKAGE =====
-multiOAuth.setupPassport(passport, User, ['google', 'facebook', 'github', 'linkedin', 'twitter', 'instagram', 'reddit']);
+});
 
 // ===== DEBUG ENDPOINT =====
 app.get('/debug/session', (req, res) => {
@@ -88,95 +80,70 @@ app.get('/', (req, res) => {
 });
 
 // ===== GOOGLE =====
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile'] })
-);
+app.get('/auth/google', multiOAuth.authenticateWithDefaults('google'));
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('google', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
-    // Redirect to frontend dashboard on success
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== FACEBOOK =====
-app.get('/auth/facebook',
-  passport.authenticate('facebook', { scope: ['public_profile', 'email'] })
-);
+app.get('/auth/facebook', multiOAuth.authenticateWithDefaults('facebook'));
 
 app.get('/auth/facebook/callback',
-  (req, res, next) => {
-    // Check for authorization code reuse
-    if (req.query.code && req.query.state) {
-      console.log('[Facebook] Callback received with code:', req.query.code.substring(0, 10) + '...');
-    }
-    next();
-  },
-  passport.authenticate('facebook', { 
-    failureRedirect: 'http://localhost:5173/?error=auth_failed',
-    failureMessage: true
-  }),
+  multiOAuth.authenticateCallback('facebook', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== GITHUB =====
-app.get('/auth/github',
-  passport.authenticate('github', { scope: ['user:email'] })
-);
+app.get('/auth/github', multiOAuth.authenticateWithDefaults('github'));
 
 app.get('/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('github', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== LINKEDIN =====
-app.get('/auth/linkedin',
-  passport.authenticate('linkedin', { scope: ['openid', 'profile', 'email'] })
-);
+app.get('/auth/linkedin', multiOAuth.authenticateWithDefaults('linkedin'));
 
 app.get('/auth/linkedin/callback',
-  passport.authenticate('linkedin', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('linkedin', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== TWITTER =====
-app.get('/auth/twitter',
-  passport.authenticate('twitter')
-);
+app.get('/auth/twitter', multiOAuth.authenticateWithDefaults('twitter'));
 
 app.get('/auth/twitter/callback',
-  passport.authenticate('twitter', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('twitter', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== INSTAGRAM =====
-app.get('/auth/instagram',
-  passport.authenticate('instagram')
-);
+app.get('/auth/instagram', multiOAuth.authenticateWithDefaults('instagram'));
 
 app.get('/auth/instagram/callback',
-  passport.authenticate('instagram', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('instagram', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
 );
 
 // ===== REDDIT =====
-app.get('/auth/reddit',
-  passport.authenticate('reddit', { duration: 'permanent' })
-);
+app.get('/auth/reddit', multiOAuth.authenticateWithDefaults('reddit'));
 
 app.get('/auth/reddit/callback',
-  passport.authenticate('reddit', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  multiOAuth.authenticateCallback('reddit', 'http://localhost:5173/?error=auth_failed'),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }

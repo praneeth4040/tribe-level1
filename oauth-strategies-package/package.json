@@ -1,6 +1,6 @@
 {
   "name": "multi-oauth-strategies",
-  "version": "1.0.18",
+  "version": "1.1.0",
   "description": "Pre-configured OAuth strategies for Passport.js - Support for Google, Facebook, GitHub, LinkedIn, Twitter, Instagram, and Reddit",
   "main": "index.js",
   "types": "index.d.ts",
@@ -25,7 +25,9 @@
     "instagram",
     "reddit",
     "oauth2",
-    "social-login"
+    "social-login",
+    "automatic-initialization",
+    "passport-middleware"
   ],
   "author": "Praneeth",
   "license": "MIT",

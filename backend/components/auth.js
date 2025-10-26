@@ -11,32 +11,40 @@ function generateRefreshToken(userId) {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
 }
 
-// Google OAuth callback
-async function googleCallback(req, res) {
-  try {
-    const user = req.user;
+/**
+ * Generic OAuth callback handler for all providers
+ * @param {string} provider - OAuth provider name (google, facebook, etc.)
+ */
+function oauthCallback(provider) {
+  return async (req, res) => {
+    try {
+      const user = req.user;
 
-    if (!user) {
-      const redirectUrl = `${process.env.FRONTEND_URL}/result?error=authentication_failed`;
-      return res.redirect(redirectUrl);
+      if (!user) {
+        const redirectUrl = `${process.env.FRONTEND_URL}/result?error=${provider}_auth_failed`;
+        return res.redirect(redirectUrl);
+      }
+
+      // Generate tokens
+      const accessToken = generateToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      // Save refresh token to DB
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      // Redirect to frontend result page with tokens as query params
+      const redirectUrl = `${process.env.FRONTEND_URL}/result?accessToken=${accessToken}&refreshToken=${refreshToken}&userId=${user._id}&provider=${provider}`;
+      res.redirect(redirectUrl);
+    } catch (err) {
+      console.error(`${provider} callback error:`, err);
+      res.redirect(`${process.env.FRONTEND_URL}/result?error=authentication_failed`);
     }
-
-    // Generate tokens
-    const accessToken = generateToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-
-    // Save refresh token to DB
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    // Redirect to frontend result page with tokens as query params
-    const redirectUrl = `${process.env.FRONTEND_URL}/result?accessToken=${accessToken}&refreshToken=${refreshToken}&userId=${user._id}`;
-    res.redirect(redirectUrl);
-  } catch (err) {
-    console.error('Google callback error:', err);
-    res.redirect(`${process.env.FRONTEND_URL}/result?error=authentication_failed`);
-  }
+  };
 }
+
+// Google OAuth callback
+const googleCallback = oauthCallback('google');
 
 // Get current user (for persistent login)
 async function getCurrentUser(req, res) {
@@ -61,8 +69,7 @@ async function getCurrentUser(req, res) {
         email: user.email,
         name: user.name,
         profilePic: user.profilePic,
-        refreshToken: user.refreshToken,
-        googleId: user.googleId,
+        linkedProviders: user.linkedProviders,
       },
     });
   } catch (err) {
@@ -78,6 +85,7 @@ function logout(req, res) {
 
 module.exports = {
   googleCallback,
+  oauthCallback,
   getCurrentUser,
   logout,
 };

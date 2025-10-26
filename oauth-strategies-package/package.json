@@ -1,0 +1,53 @@
+{
+  "name": "multi-oauth-strategies",
+  "version": "1.0.3",
+  "description": "Pre-configured OAuth strategies for Passport.js - Support for Google, Facebook, GitHub, LinkedIn, Twitter, Instagram, and Reddit",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "prepare": "npm run build",
+    "build": "echo 'Building...'"
+  },
+  "keywords": [
+    "oauth",
+    "passport",
+    "authentication",
+    "google",
+    "facebook",
+    "github",
+    "linkedin",
+    "twitter",
+    "instagram",
+    "reddit",
+    "oauth2",
+    "social-login"
+  ],
+  "author": "Praneeth",
+  "license": "MIT",
+  "peerDependencies": {
+    "passport": "^0.6.0",
+    "mongoose": "^6.0.0 || ^7.0.0"
+  },
+  "dependencies": {
+    "passport-google-oauth20": "^2.0.0",
+    "passport-facebook": "^3.0.0",
+    "passport-github2": "^0.1.12",
+    "passport-linkedin-oauth2": "^2.0.0",
+    "passport-twitter": "^1.0.4",
+    "passport-instagram": "^1.0.0",
+    "passport-reddit": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/praneeth4040/multi-oauth-strategies"
+  },
+  "bugs": {
+    "url": "https://github.com/praneeth4040/multi-oauth-strategies/issues"
+  },
+  "homepage": "https://github.com/praneeth4040/multi-oauth-strategies#readme"
+}

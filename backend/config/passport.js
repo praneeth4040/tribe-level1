@@ -21,7 +21,7 @@ passport.use(
           }
           return done(null, user);
         }
-
+        console.log(profile);
         // Create new user
         user = new User({
           googleId: profile.id,

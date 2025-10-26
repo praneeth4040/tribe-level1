@@ -61,6 +61,8 @@ async function getCurrentUser(req, res) {
         email: user.email,
         name: user.name,
         profilePic: user.profilePic,
+        refreshToken: user.refreshToken,
+        googleId: user.googleId,
       },
     });
   } catch (err) {

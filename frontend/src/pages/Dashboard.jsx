@@ -69,6 +69,8 @@ function Dashboard() {
           <p>Welcome, {user.name}!</p>
           <p>Email: {user.email}</p>
           {user.profilePic && <img src={user.profilePic} alt="Profile" style={{ width: '100px', borderRadius: '50%' }} />}
+          <p>Google ID: {user.googleId}</p> 
+          
         </div>
       )}
       <button onClick={handleLogout}>Logout</button>

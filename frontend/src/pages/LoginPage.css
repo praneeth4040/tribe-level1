@@ -1,0 +1,175 @@
+/* OAuth Login Page Styles */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-box {
+  background: white;
+  padding: 50px 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: white;
+  width: 100%;
+}
+
+.oauth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.oauth-btn:active {
+  transform: translateY(0);
+}
+
+/* Google Button */
+.oauth-btn.google {
+  background: #DB4437;
+}
+
+.oauth-btn.google:hover {
+  background: #c23a27;
+}
+
+/* Facebook Button */
+.oauth-btn.facebook {
+  background: #1877F2;
+}
+
+.oauth-btn.facebook:hover {
+  background: #0a66c2;
+}
+
+/* GitHub Button */
+.oauth-btn.github {
+  background: #333;
+}
+
+.oauth-btn.github:hover {
+  background: #1a1a1a;
+}
+
+/* LinkedIn Button */
+.oauth-btn.linkedin {
+  background: #0A66C2;
+}
+
+.oauth-btn.linkedin:hover {
+  background: #084ca4;
+}
+
+/* Twitter Button */
+.oauth-btn.twitter {
+  background: #1DA1F2;
+}
+
+.oauth-btn.twitter:hover {
+  background: #1a8cd8;
+}
+
+/* Instagram Button */
+.oauth-btn.instagram {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.oauth-btn.instagram:hover {
+  opacity: 0.9;
+}
+
+/* Reddit Button */
+.oauth-btn.reddit {
+  background: #FF4500;
+}
+
+.oauth-btn.reddit:hover {
+  background: #e03d00;
+}
+
+.oauth-icon {
+  font-size: 18px;
+}
+
+.divider {
+  margin: 30px 0;
+  position: relative;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider span {
+  background: white;
+  padding: 0 15px;
+  position: relative;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -27,12 +27,15 @@ async function handleOAuthCallback(provider, profile, accessToken, refreshToken 
       throw new Error(`No email found in ${provider} profile. Make sure 'email' scope is included in OAuth request.`);
     }
 
+    console.log(`[OAuth] Processing ${provider} login for email: ${email}`);
+
     // Check if user already exists with this provider ID
     let user = await userModel.findOne({
       [`oauthProviders.${provider}.id`]: profile.id,
     });
 
     if (user) {
+      console.log(`[OAuth] Found existing user by provider ID for ${provider}`);
       // Update tokens and provider info
       user.oauthProviders[provider] = {
         id: profile.id,
@@ -47,6 +50,7 @@ async function handleOAuthCallback(provider, profile, accessToken, refreshToken 
     user = await userModel.findOne({ email: email });
 
     if (user) {
+      console.log(`[OAuth] Found existing user by email. Linking ${provider} account.`);
       // Link this provider to existing account
       user.oauthProviders[provider] = {
         id: profile.id,
@@ -56,6 +60,7 @@ async function handleOAuthCallback(provider, profile, accessToken, refreshToken 
 
       if (!user.linkedProviders.includes(provider)) {
         user.linkedProviders.push(provider);
+        console.log(`[OAuth] Added ${provider} to linkedProviders`);
       }
 
       await user.save();
@@ -63,6 +68,7 @@ async function handleOAuthCallback(provider, profile, accessToken, refreshToken 
     }
 
     // Create new user
+    console.log(`[OAuth] Creating new user for ${provider}`);
     user = new userModel({
       email: email,
       name: profile.displayName || profile.name || profile.username || 'User',
@@ -78,6 +84,7 @@ async function handleOAuthCallback(provider, profile, accessToken, refreshToken 
     });
 
     await user.save();
+    console.log(`[OAuth] User created successfully`);
     return user;
   } catch (error) {
     console.error(`OAuth callback error for ${provider}:`, error);

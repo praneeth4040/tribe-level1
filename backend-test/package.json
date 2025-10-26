@@ -12,7 +12,7 @@
     "express": "^4.18.0",
     "express-session": "^1.17.0",
     "mongoose": "^7.0.0",
-    "multi-oauth-strategies": "^1.0.12",
+    "multi-oauth-strategies": "^1.0.18",
     "passport": "^0.6.0"
   },
   "devDependencies": {

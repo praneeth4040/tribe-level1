@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(true);
   const API_BASE_URL = 'http://localhost:4000';
 
   useEffect(() => {
@@ -17,10 +18,13 @@ function LoginPage() {
           const data = await response.json();
           if (data.user) {
             navigate('/dashboard');
+            return;
           }
         }
       } catch (err) {
         console.log('Not logged in');
+      } finally {
+        setIsChecking(false);
       }
     };
 
@@ -30,6 +34,18 @@ function LoginPage() {
   const handleOAuthLogin = (provider) => {
     window.location.href = `${API_BASE_URL}/auth/${provider}`;
   };
+
+  // Show loading while checking auth
+  if (isChecking) {
+    return (
+      <div className="login-container">
+        <div className="login-box">
+          <h1 className="login-title">🔐 Login</h1>
+          <p className="login-subtitle">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">

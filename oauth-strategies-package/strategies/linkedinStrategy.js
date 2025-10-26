@@ -63,36 +63,90 @@ module.exports = (userModel) => {
         console.warn('Could not fetch LinkedIn user info:', userError.message);
       }
 
-      // Fetch email - MUST have email
-      try {
-        const emailResponse = await fetch('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Accept': 'application/json',
-          }
-        });
+      // Try multiple email endpoints
+      let emailFound = false;
 
-        if (emailResponse.ok) {
-          const emailData = await emailResponse.json();
-          if (emailData.elements && emailData.elements.length > 0) {
-            const element = emailData.elements[0];
-            // Try different ways to extract email
-            if (element['handle~'] && element['handle~'].emailAddress) {
-              profile.email = element['handle~'].emailAddress;
-            } else if (element.handle) {
-              profile.email = element.handle;
-            } else if (typeof element === 'string') {
-              profile.email = element;
+      // Approach 1: Try OpenID Connect /userinfo endpoint
+      if (!emailFound) {
+        try {
+          const userinfoResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+            }
+          });
+
+          if (userinfoResponse.ok) {
+            const userinfoData = await userinfoResponse.json();
+            if (userinfoData.email) {
+              profile.email = userinfoData.email;
+              emailFound = true;
+              console.log('[LinkedIn] Got email from userinfo endpoint');
             }
           }
+        } catch (e) {
+          console.warn('[LinkedIn] userinfo endpoint failed:', e.message);
         }
-      } catch (emailError) {
-        console.warn('Could not fetch LinkedIn email:', emailError.message);
       }
 
-      // MUST generate email if not found
+      // Approach 2: Try v2 emailAddress endpoint
+      if (!emailFound) {
+        try {
+          const emailResponse = await fetch('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+            }
+          });
+
+          if (emailResponse.ok) {
+            const emailData = await emailResponse.json();
+            if (emailData.elements && emailData.elements.length > 0) {
+              const element = emailData.elements[0];
+              // Try different ways to extract email
+              if (element['handle~'] && element['handle~'].emailAddress) {
+                profile.email = element['handle~'].emailAddress;
+                emailFound = true;
+                console.log('[LinkedIn] Got email from handle~ field');
+              } else if (element.handle) {
+                profile.email = element.handle;
+                emailFound = true;
+                console.log('[LinkedIn] Got email from handle field');
+              }
+            }
+          }
+        } catch (emailError) {
+          console.warn('[LinkedIn] emailAddress endpoint failed:', emailError.message);
+        }
+      }
+
+      // Approach 3: Try old /v1/ endpoint as fallback
+      if (!emailFound) {
+        try {
+          const oldEmailResponse = await fetch('https://api.linkedin.com/v1/people/~:(email-address)', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+            }
+          });
+
+          if (oldEmailResponse.ok) {
+            const oldEmailData = await oldEmailResponse.json();
+            if (oldEmailData.emailAddress) {
+              profile.email = oldEmailData.emailAddress;
+              emailFound = true;
+              console.log('[LinkedIn] Got email from v1 endpoint');
+            }
+          }
+        } catch (e) {
+          console.warn('[LinkedIn] v1 endpoint failed:', e.message);
+        }
+      }
+
+      // Fallback: use ID-based email
       if (!profile.email) {
         profile.email = `${profile.id}@linkedin-oauth.local`;
+        console.warn('[LinkedIn] Using fallback email:', profile.email);
       }
 
       return done(null, profile);
@@ -102,7 +156,7 @@ module.exports = (userModel) => {
       return done(null, {
         id: 'linkedin_' + Math.random().toString(36).substr(2, 9),
         displayName: 'LinkedIn User',
-        email: `linkedin_${Date.now()}@linkedin-oauth.local`,  // MUST have email
+        email: `linkedin_${Date.now()}@linkedin-oauth.local`,
         provider: 'linkedin',
         _raw: {},
         _json: {}

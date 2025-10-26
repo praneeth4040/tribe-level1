@@ -1,6 +1,6 @@
 {
   "name": "multi-oauth-strategies",
-  "version": "1.0.12",
+  "version": "1.0.18",
   "description": "Pre-configured OAuth strategies for Passport.js - Support for Google, Facebook, GitHub, LinkedIn, Twitter, Instagram, and Reddit",
   "main": "index.js",
   "types": "index.d.ts",

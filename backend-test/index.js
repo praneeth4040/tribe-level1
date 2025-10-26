@@ -106,7 +106,17 @@ app.get('/auth/facebook',
 );
 
 app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: 'http://localhost:5173/?error=auth_failed' }),
+  (req, res, next) => {
+    // Check for authorization code reuse
+    if (req.query.code && req.query.state) {
+      console.log('[Facebook] Callback received with code:', req.query.code.substring(0, 10) + '...');
+    }
+    next();
+  },
+  passport.authenticate('facebook', { 
+    failureRedirect: 'http://localhost:5173/?error=auth_failed',
+    failureMessage: true
+  }),
   (req, res) => {
     res.redirect('http://localhost:5173/dashboard');
   }
@@ -215,23 +225,20 @@ app.get('/auth/error', (req, res) => {
   res.status(401).json({ error: '✗ Authentication failed' });
 });
 
-// ===== GET ALL USERS =====
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.json({
-      total: users.length,
-      users: users.map(u => ({
-        _id: u._id,
-        email: u.email,
-        name: u.name,
-        linkedProviders: u.linkedProviders,
-        createdAt: u.createdAt
-      }))
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+// ===== ERROR HANDLER =====
+app.use((err, req, res, next) => {
+  console.error('[ERROR]', err.message);
+  
+  // Handle OAuth errors
+  if (err.message && err.message.includes('authorization code')) {
+    return res.redirect('http://localhost:5173/?error=code_reused&message=' + encodeURIComponent(err.message));
   }
+  
+  if (err.name === 'FacebookTokenError' || err.name === 'AuthorizationError') {
+    return res.redirect('http://localhost:5173/?error=oauth_error&message=' + encodeURIComponent(err.message));
+  }
+  
+  res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
 // ===== START SERVER =====

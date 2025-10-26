@@ -38,6 +38,45 @@ async function googleCallback(req, res) {
   }
 }
 
+// Get current user (for persistent login)
+async function getCurrentUser(req, res) {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        profilePic: user.profilePic,
+      },
+    });
+  } catch (err) {
+    console.error('Get current user error:', err);
+    res.status(401).json({ error: 'Unauthorized' });
+  }
+}
+
+// Logout
+function logout(req, res) {
+  res.json({ message: 'Logout successful' });
+}
+
 module.exports = {
   googleCallback,
+  getCurrentUser,
+  logout,
 };
+

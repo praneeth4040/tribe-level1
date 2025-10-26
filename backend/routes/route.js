@@ -16,4 +16,8 @@ router.get(
   authController.googleCallback
 );
 
+// Protected routes
+router.get('/auth/me', authController.getCurrentUser);
+router.post('/auth/logout', authController.logout);
+
 module.exports = router;

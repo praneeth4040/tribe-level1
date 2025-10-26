@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function ResultPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
   const [data, setData] = useState(null);
@@ -27,15 +28,20 @@ function ResultPage() {
         userId: userId,
       });
       
-      // Store tokens
+      // Store tokens in localStorage for persistent login
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('userId', userId);
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
     } else {
       setStatus('failure');
       setMessage('No tokens received');
     }
-  }, [location]);
+  }, [location, navigate]);
 
   return (
     <div>
@@ -46,7 +52,7 @@ function ResultPage() {
           <h1>Success!</h1>
           <p>Login successful</p>
           <pre>{JSON.stringify(data, null, 2)}</pre>
-          <a href="/">Back to Login</a>
+          <p>Redirecting to dashboard...</p>
         </div>
       )}
       

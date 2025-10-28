@@ -8,6 +8,7 @@ const InstagramStrategy = require('./strategies/instagramStrategy');
 const RedditStrategy = require('./strategies/redditStrategy');
 const { handleOAuthCallback } = require('./utils/oauthHandler');
 const setupPassport = require('./config/passport');
+const session = require('express-session');
 
 /**
  * Initialize Passport middleware automatically
@@ -71,7 +72,6 @@ function initializeOAuth(app, userModel, providers = null, sessionConfig = {}) {
     throw new Error('User model is required');
   }
 
-  const session = require('express-session');
   
   // Default session configuration
   const defaultSessionConfig = {
